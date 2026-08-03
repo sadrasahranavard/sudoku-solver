@@ -1,8 +1,10 @@
 from src.models.board import Board
-from src.solver.validator import is_valid_move
+from src.solver.validator import is_valid_move, is_board_valid
 
 def solve(board: Board) -> bool:
-    #find first empty cell
+    if not is_board_valid(board):
+        return False
+
     empty = None
     for row in range(9):
         for col in range(9):
@@ -12,7 +14,6 @@ def solve(board: Board) -> bool:
         if empty:
             break
 
-    #no empty cells: solved
     if empty is None:
         return True
 
@@ -25,12 +26,14 @@ def solve(board: Board) -> bool:
             if solve(board):
                 return True
 
-            #backtrack
             board.set_value(row, col, 0)
 
     return False
 
 def count_solutions(board: Board, limit: int = 2) -> int:
+    if not is_board_valid(board):
+        return 0
+
     board_copy = board.copy()
     count = 0
 
@@ -38,9 +41,8 @@ def count_solutions(board: Board, limit: int = 2) -> int:
         nonlocal count
 
         if count >= limit:
-            return True  # Stop searching
+            return True
 
-        #find first empty cell
         empty = None
         for row in range(9):
             for col in range(9):
@@ -72,5 +74,4 @@ def count_solutions(board: Board, limit: int = 2) -> int:
     return count
 
 def has_unique_solution(board: Board) -> bool:
-    #check if it has exactly one solution.
     return count_solutions(board, limit=2) == 1
