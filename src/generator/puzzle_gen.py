@@ -9,7 +9,6 @@ def generate_solution() -> Board:
     _fill_board(board)
     return board
 
-
 def _fill_board(board: Board) -> bool:
     empty = None
     for row in range(9):
@@ -36,7 +35,6 @@ def _fill_board(board: Board) -> bool:
 
     return False
 
-
 def generate_puzzle(difficulty: str = 'medium') -> Tuple[Board, Board]:
     difficulty_levels = {
         'easy': 30,
@@ -54,7 +52,8 @@ def generate_puzzle(difficulty: str = 'medium') -> Tuple[Board, Board]:
 
     solution = generate_solution()
 
-    puzzle = solution.copy()
+    grid = solution.to_grid()
+    puzzle = Board(grid)
 
     positions = [(r, c) for r in range(9) for c in range(9)]
     random.shuffle(positions)
@@ -64,12 +63,15 @@ def generate_puzzle(difficulty: str = 'medium') -> Tuple[Board, Board]:
         if removed >= target_empty:
             break
 
-        backup = puzzle.get_value(row, col)
-        puzzle.set_value(row, col, 0)
+        backup = grid[row][col]
+        grid[row][col] = 0
 
-        if has_unique_solution(puzzle):
+        test_board = Board(grid)
+
+        if has_unique_solution(test_board):
             removed += 1
         else:
-            puzzle.set_value(row, col, backup)
+            grid[row][col] = backup
 
+    puzzle = Board(grid)
     return puzzle, solution
