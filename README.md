@@ -69,39 +69,6 @@ Validate:
 Plain .txt file. 9 rows. 9 space-separated values per row.
 0 or . for empty cells.
 
-## Project Structure
-
-sudoku-solver/
-
-  src/
-    models/
-      cell.py
-      board.py
-    solver/
-      validator.py
-      backtracking.py
-    generator/
-      puzzle_gen.py
-    io/
-      file_handler.py
-      display.py
-    cli.py
-
-  tests/
-    test_cell.py
-    test_board.py
-    test_validator.py
-    test_solver.py
-    test_generator.py
-    test_file_handler.py
-    test_display.py
-    test_cli.py
-
-  README.md
-  requirements.txt
-  setup.py
-  .gitignore
-
 ---
 
 ## Algorithm
