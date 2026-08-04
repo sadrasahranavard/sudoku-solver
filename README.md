@@ -11,59 +11,63 @@ A Sudoku solver and generator with a command-line interface. Built with Python.
 - Detect unsolvable puzzles and puzzles with multiple solutions
 - Display formatted board with box borders in the terminal
 - Save solutions to file
-- Generate new puzzles with guaranteed unique solutions at three difficulty levels (easy, medium, hard)
-- Manual entry - type a puzzle directly in the terminal with input validation
-- Multiple solution detection - reports whether a puzzle has 0, 1, or multiple solutions
-- Side-by-side comparison - view original puzzle and solution together
+- Generate new puzzles at three difficulty levels (easy, medium, hard)
+- Manual entry with input validation
+- Multiple solution detection
+- Side-by-side puzzle and solution view
 
 ---
 
 ## Installation
 
-Prerequisites: Python 3.8 or higher
+Python 3.8 or higher required.
 
-git clone https://github.com/sadrasahranavard/sudoku-solver.git
-cd sudoku-solver
-python -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt
+Clone the repo:
+  git clone https://github.com/sadrasahranavard/sudoku-solver.git
+  cd sudoku-solver
+
+Setup virtual environment:
+  python -m venv venv
+  venv\Scripts\activate
+
+Install:
+  pip install -r requirements.txt
 
 ---
 
 ## Usage
 
-Solve a puzzle from file:
-python -m src.cli puzzle.txt
+Solve:
+  python -m src.cli puzzle.txt
 
-Solve and save to file:
-python -m src.cli puzzle.txt -o solution.txt
+Solve and save:
+  python -m src.cli puzzle.txt -o solution.txt
 
-Generate a new puzzle:
-python -m src.cli --generate --difficulty easy
-python -m src.cli --generate --difficulty medium
-python -m src.cli --generate --difficulty hard
+Generate:
+  python -m src.cli --generate --difficulty easy
+  python -m src.cli --generate --difficulty medium
+  python -m src.cli --generate --difficulty hard
 
-Enter a puzzle manually:
-python -m src.cli --enter
+Manual entry:
+  python -m src.cli --enter
 
-Type 9 rows. Supports spaces (5 3 0 0 7 0 0 0 0) or dots (5 3 . . 7 . . . .). Validates input with retry on errors.
-
-Validate without solving:
-python -m src.cli --validate puzzle.txt
+Validate:
+  python -m src.cli --validate puzzle.txt
 
 ---
 
 ## Running Tests
 
-pytest tests/ -v
+  pytest tests/ -v
 
-80+ tests across 8 test files covering all modules.
+80+ tests across 8 files.
 
 ---
 
 ## Input File Format
 
-Plain .txt file, 9 rows, 9 space-separated values each. 0 or . for empty.
+Plain .txt file. 9 rows. 9 space-separated values per row.
+0 or . for empty cells.
 
 Example:
 
@@ -82,32 +86,35 @@ Example:
 ## Project Structure
 
 sudoku-solver/
-├── src/
-│   ├── models/
-│   │   ├── cell.py
-│   │   └── board.py
-│   ├── solver/
-│   │   ├── validator.py
-│   │   └── backtracking.py
-│   ├── generator/
-│   │   └── puzzle_gen.py
-│   ├── io/
-│   │   ├── file_handler.py
-│   │   └── display.py
-│   └── cli.py
-├── tests/
-│   ├── test_cell.py
-│   ├── test_board.py
-│   ├── test_validator.py
-│   ├── test_solver.py
-│   ├── test_generator.py
-│   ├── test_file_handler.py
-│   ├── test_display.py
-│   └── test_cli.py
-├── README.md
-├── requirements.txt
-├── setup.py
-└── .gitignore
+
+  src/
+    models/
+      cell.py
+      board.py
+    solver/
+      validator.py
+      backtracking.py
+    generator/
+      puzzle_gen.py
+    io/
+      file_handler.py
+      display.py
+    cli.py
+
+  tests/
+    test_cell.py
+    test_board.py
+    test_validator.py
+    test_solver.py
+    test_generator.py
+    test_file_handler.py
+    test_display.py
+    test_cli.py
+
+  README.md
+  requirements.txt
+  setup.py
+  .gitignore
 
 ---
 
@@ -115,36 +122,36 @@ sudoku-solver/
 
 Recursive backtracking with constraint propagation:
 
-1. Validate board for rule violations before solving
+1. Validate board before solving
 2. Find first empty cell
-3. Try values 1-9, checking row/column/box constraints
-4. Recursively fill next cell
+3. Try values 1-9, check row/column/box
+4. Recurse to next cell
 5. Backtrack if stuck
-6. Can count solutions (0, 1, or multiple) up to a limit
+6. Count solutions (0, 1, multiple)
 
 ---
 
-## Design Decisions
+## Design
 
-- Cells track their own row, column, and box index
-- Original puzzle cells are locked (cannot be modified)
-- Separate modules for validation, solving, generation, I/O, and display
-- Pure functions over classes for solver and validator
-
----
-
-## Known Limitations
-
-- Empty board solving skipped in tests (needs MRV heuristic)
-- Hard puzzle generation takes several minutes
-- Terminal colors may not work on all systems
-- Only supports standard 9x9 Sudoku
+- Cells know their row, column, box
+- Given cells are locked
+- Separate modules per responsibility
+- Pure functions for solver and validator
 
 ---
 
-## Future Plans
+## Limitations
 
-- GUI version using Tkinter (gui-version branch)
-- Web version using Flask (web-version branch)
+- Empty board test skipped (needs MRV)
+- Hard generation is slow
+- Colors may not work on all terminals
+- 9x9 only
 
-Both will share the same core solver engine.
+---
+
+## Future
+
+- GUI version (Tkinter) on gui-version branch
+- Web version (Flask) on web-version branch
+
+Same core engine across all versions.
