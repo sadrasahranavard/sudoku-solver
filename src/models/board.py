@@ -100,7 +100,13 @@ class Board:
         return len(self.get_empty_positions()) == 0
 
     def copy(self) -> 'Board':
-        return Board(self.to_grid())
+        grid = self.to_grid()
+        new_board = Board(grid)
+    
+        for r in range(9):
+            for c in range(9):
+                new_board._cells[r][c]._locked = self._cells[r][c].locked
+        return new_board
 
     def to_grid(self) -> List[List[int]]:
         return [[cell.value for cell in row] for row in self._cells]

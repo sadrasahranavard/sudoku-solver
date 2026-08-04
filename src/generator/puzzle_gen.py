@@ -53,7 +53,6 @@ def generate_puzzle(difficulty: str = 'medium') -> Tuple[Board, Board]:
     solution = generate_solution()
 
     grid = solution.to_grid()
-    puzzle = Board(grid)
 
     positions = [(r, c) for r in range(9) for c in range(9)]
     random.shuffle(positions)
@@ -67,6 +66,9 @@ def generate_puzzle(difficulty: str = 'medium') -> Tuple[Board, Board]:
         grid[row][col] = 0
 
         test_board = Board(grid)
+        for r in range(9):
+            for c in range(9):
+                test_board._cells[r][c]._locked = False
 
         if has_unique_solution(test_board):
             removed += 1
