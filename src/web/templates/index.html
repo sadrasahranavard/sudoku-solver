@@ -6,61 +6,115 @@
     <title>Sudoku Solver</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
+<body class="{{ theme }}">
     <div class="container">
-        <h1>Sudoku Solver</h1>
+        <header>
+            <div class="brand">
+                <span class="brand-icon">◈</span>
+                Sudoku Solver
+            </div>
+            <form id="theme-form" method="POST" style="display:none;">
+                <input type="hidden" name="action" value="toggle-theme">
+            </form>
+            <button class="theme-toggle" onclick="document.getElementById('theme-form').submit();" title="Toggle theme">
+                {% if theme == 'dark' %}&#9790;{% else %}&#9728;{% endif %}
+            </button>
+        </header>
 
         {% if message %}
-        <div class="message {{ message_type }}">{{ message }}</div>
+        <div class="alert {{ message_type }}">{{ message }}</div>
         {% endif %}
 
-        <form method="POST" enctype="multipart/form-data" id="sudoku-form">
-            <div class="buttons">
-                <button type="submit" name="action" value="solve">Solve</button>
-                <button type="submit" name="action" value="validate">Validate</button>
-                <button type="submit" name="action" value="check">Check Solutions</button>
-                <button type="submit" name="action" value="clear">Clear</button>
-            </div>
+        <main>
+            <form method="POST" enctype="multipart/form-data" id="sudoku-form">
+                <div class="board-section">
+                    <div class="controls-panel">
+                        <div class="action-buttons">
+                            <button type="submit" name="action" value="solve" class="btn btn-primary">
+                                <span class="btn-icon">▶</span> Solve Puzzle
+                            </button>
+                            <button type="submit" name="action" value="validate" class="btn btn-secondary">
+                                <span class="btn-icon">✓</span> Validate
+                            </button>
+                            <button type="submit" name="action" value="check" class="btn btn-secondary">
+                                <span class="btn-icon">⚡</span> Check Solutions
+                            </button>
+                            <button type="submit" name="action" value="clear" class="btn btn-outline">
+                                <span class="btn-icon">↺</span> Clear Grid
+                            </button>
+                        </div>
 
-            <div class="buttons">
-                <select name="difficulty">
-                    <option value="easy" {% if difficulty == 'easy' %}selected{% endif %}>Easy</option>
-                    <option value="medium" {% if difficulty == 'medium' %}selected{% endif %}>Medium</option>
-                    <option value="hard" {% if difficulty == 'hard' %}selected{% endif %}>Hard</option>
-                </select>
-                <button type="submit" name="action" value="generate">Generate</button>
-                <button type="submit" name="action" value="load" onclick="document.getElementById('file-input').click(); return false;">Load</button>
-                <button type="submit" name="action" value="save">Save</button>
-                <input type="file" id="file-input" name="file" accept=".txt" style="display:none" onchange="this.form.action.value='load'; this.form.submit();">
-            </div>
+                        <div class="separator"></div>
 
-            <div class="grid">
-                {% for row in range(9) %}
-                <div class="grid-row">
-                    {% for col in range(9) %}
-                    {% set cell = board.get_cell(row, col) %}
-                    <input
-                        type="text"
-                        name="cell_{{ row }}_{{ col }}"
-                        class="cell
-                            {% if col % 3 == 0 %}box-left{% endif %}
-                            {% if col % 3 == 2 %}box-right{% endif %}
-                            {% if row % 3 == 0 %}box-top{% endif %}
-                            {% if row % 3 == 2 %}box-bottom{% endif %}
-                            {% if cell.is_filled() and not cell.locked %}solved{% endif %}
-                            {% if cell.is_filled() and cell.locked %}given{% endif %}
-                        "
-                        value="{{ cell.value if cell.value != 0 else '' }}"
-                        maxlength="1"
-                        inputmode="numeric"
-                        pattern="[1-9]"
-                        oninput="this.value = this.value.replace(/[^1-9]/g, '').slice(0, 1)"
-                    >
-                    {% endfor %}
+                        <div class="generate-section">
+                            <label class="section-label">Generate New Puzzle</label>
+                            <div class="generate-controls">
+                                <select name="difficulty" class="difficulty-select">
+                                    <option value="easy" {% if difficulty == 'easy' %}selected{% endif %}>Easy</option>
+                                    <option value="medium" {% if difficulty == 'medium' %}selected{% endif %}>Medium</option>
+                                    <option value="hard" {% if difficulty == 'hard' %}selected{% endif %}>Hard</option>
+                                </select>
+                                <button type="submit" name="action" value="generate" class="btn btn-primary">
+                                    <span class="btn-icon">🎲</span> Generate
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="separator"></div>
+
+                        <div class="file-section">
+                            <label class="section-label">File Operations</label>
+                            <div class="file-controls">
+                                <button type="button" class="btn btn-outline" onclick="document.getElementById('file-input').click()">
+                                    <span class="btn-icon">📂</span> Load File
+                                </button>
+                                <button type="submit" name="action" value="save" class="btn btn-outline">
+                                    <span class="btn-icon">💾</span> Save File
+                                </button>
+                                <input type="file" id="file-input" name="file" accept=".txt" style="display:none" onchange="this.form.action.value='load'; this.form.submit();">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="board-container">
+                        <div class="board">
+                            {% for row in range(9) %}
+                            <div class="row">
+                                {% for col in range(9) %}
+                                {% set cell = board.get_cell(row, col) %}
+                                <input
+                                    type="text"
+                                    name="cell_{{ row }}_{{ col }}"
+                                    class="cell
+                                        {% if col in (2,5) %}br{% endif %}
+                                        {% if row in (2,5) %}bb{% endif %}
+                                        {% if cell.is_filled() and not cell.locked %}solved{% endif %}
+                                        {% if cell.is_filled() and cell.locked %}given{% endif %}
+                                    "
+                                    value="{{ cell.value if cell.value != 0 else '' }}"
+                                    maxlength="1"
+                                    inputmode="numeric"
+                                    pattern="[1-9]"
+                                    oninput="this.value = this.value.replace(/[^1-9]/g, '').slice(0, 1)"
+                                >
+                                {% endfor %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
-                {% endfor %}
-            </div>
-        </form>
+            </form>
+        </main>
+
+        <blockquote>
+            <span class="quote-mark">"</span>
+            Sudoku is not a game of numbers. It's a game of logic. The numbers are just symbols.
+            <cite>— Maki Kaji, Godfather of Sudoku</cite>
+        </blockquote>
+
+        <footer>
+            <p>Sudoku Solver © 2026</p>
+        </footer>
     </div>
 </body>
 </html>

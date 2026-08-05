@@ -1,16 +1,15 @@
 import os
-from flask import Flask, render_template, request, flash, redirect, url_for, send_file
+import tempfile
+from flask import Flask, render_template, request, redirect, url_for, send_file
+from werkzeug.utils import secure_filename
 from src.models.board import Board
 from src.solver.backtracking import solve, count_solutions
 from src.solver.validator import is_board_valid, is_solved
 from src.generator.puzzle_gen import generate_puzzle
 from src.io.file_handler import read_puzzle, write_puzzle
-from werkzeug.utils import secure_filename
-import tempfile
 
 app = Flask(__name__)
 app.secret_key = 'sudoku-solver-secret-key'
-
 UPLOAD_FOLDER = tempfile.gettempdir()
 
 @app.route('/', methods=['GET', 'POST'])
@@ -19,11 +18,11 @@ def index():
     original = None
     action = request.form.get('action', '')
     difficulty = request.form.get('difficulty', 'medium')
+    theme = request.args.get('theme', 'dark')
     message = ''
     message_type = ''
 
     grid = _read_grid_from_form()
-
     if grid:
         try:
             board = Board(grid)
@@ -32,66 +31,66 @@ def index():
 
     if action == 'solve':
         if not is_board_valid(board):
-            message = 'Puzzle contains rule violations!'
+            message = 'Puzzle contains rule violations.'
             message_type = 'error'
         elif is_solved(board):
-            message = 'Puzzle is already solved!'
+            message = 'Puzzle is already solved.'
             message_type = 'info'
         else:
             original = board.copy()
             if solve(board):
-                message = 'Puzzle solved successfully!'
+                message = 'Puzzle solved successfully.'
                 message_type = 'success'
             else:
-                message = 'No solution exists!'
+                message = 'No solution exists for this puzzle.'
                 message_type = 'error'
                 board = original
 
     elif action == 'validate':
         if not is_board_valid(board):
-            message = 'Invalid — contains rule violations!'
+            message = 'Invalid — contains rule violations.'
             message_type = 'error'
         elif is_solved(board):
-            message = 'Valid and already solved!'
+            message = 'Valid and already solved.'
             message_type = 'success'
         else:
             solutions = count_solutions(board, limit=2)
             if solutions == 0:
-                message = 'Unsolvable!'
+                message = 'Unsolvable puzzle.'
                 message_type = 'error'
             elif solutions == 1:
-                message = 'Valid with unique solution!'
+                message = 'Valid with a unique solution.'
                 message_type = 'success'
             else:
-                message = 'Valid with multiple solutions!'
+                message = 'Valid with multiple solutions.'
                 message_type = 'info'
 
     elif action == 'check':
         if is_board_valid(board):
             solutions = count_solutions(board, limit=3)
             if solutions == 0:
-                message = 'No solutions'
+                message = 'No solutions.'
             elif solutions == 1:
-                message = 'Unique solution'
+                message = 'Unique solution.'
             elif solutions == 2:
-                message = 'At least 2 solutions'
+                message = 'At least 2 solutions.'
             else:
-                message = '3 or more solutions'
+                message = '3 or more solutions.'
             message_type = 'info'
         else:
-            message = 'Invalid puzzle!'
+            message = 'Invalid puzzle.'
             message_type = 'error'
 
     elif action == 'generate':
         puzzle, _ = generate_puzzle(difficulty)
         board = puzzle
         empty = len(puzzle.get_empty_positions())
-        message = f'Generated {difficulty} puzzle — {empty} empty cells'
+        message = f'Generated {difficulty} puzzle with {empty} empty cells.'
         message_type = 'success'
 
     elif action == 'clear':
         board = Board()
-        message = 'Grid cleared'
+        message = 'Grid cleared.'
         message_type = 'info'
 
     elif action == 'load':
@@ -102,10 +101,10 @@ def index():
             file.save(filepath)
             try:
                 board = read_puzzle(filepath)
-                message = f'Loaded: {filename}'
+                message = f'Loaded {filename}.'
                 message_type = 'success'
             except Exception as e:
-                message = f'Error loading file: {e}'
+                message = f'Error: {e}'
                 message_type = 'error'
             finally:
                 os.remove(filepath)
@@ -116,13 +115,17 @@ def index():
             write_puzzle(board, filepath)
             return send_file(filepath, as_attachment=True, download_name='puzzle.txt')
 
+    elif action == 'toggle-theme':
+        new_theme = 'light' if theme == 'dark' else 'dark'
+        return redirect(url_for('index', theme=new_theme))
+
     return render_template(
         'index.html',
         board=board,
-        original=original,
         message=message,
         message_type=message_type,
-        difficulty=difficulty
+        difficulty=difficulty,
+        theme=theme
     )
 
 def _read_grid_from_form():
@@ -137,10 +140,8 @@ def _read_grid_from_form():
             else:
                 grid_row.append(0)
         grid.append(grid_row)
-
     if all(all(v == 0 for v in row) for row in grid):
         return None
-
     return grid
 
 if __name__ == '__main__':
