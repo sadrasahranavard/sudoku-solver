@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku Solver</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Sudoku Solver</h1>
+
+        {% if message %}
+        <div class="message {{ message_type }}">{{ message }}</div>
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data" id="sudoku-form">
+            <div class="buttons">
+                <button type="submit" name="action" value="solve">Solve</button>
+                <button type="submit" name="action" value="validate">Validate</button>
+                <button type="submit" name="action" value="check">Check Solutions</button>
+                <button type="submit" name="action" value="clear">Clear</button>
+            </div>
+
+            <div class="buttons">
+                <select name="difficulty">
+                    <option value="easy" {% if difficulty == 'easy' %}selected{% endif %}>Easy</option>
+                    <option value="medium" {% if difficulty == 'medium' %}selected{% endif %}>Medium</option>
+                    <option value="hard" {% if difficulty == 'hard' %}selected{% endif %}>Hard</option>
+                </select>
+                <button type="submit" name="action" value="generate">Generate</button>
+                <button type="submit" name="action" value="load" onclick="document.getElementById('file-input').click(); return false;">Load</button>
+                <button type="submit" name="action" value="save">Save</button>
+                <input type="file" id="file-input" name="file" accept=".txt" style="display:none" onchange="this.form.action.value='load'; this.form.submit();">
+            </div>
+
+            <div class="grid">
+                {% for row in range(9) %}
+                <div class="grid-row">
+                    {% for col in range(9) %}
+                    {% set cell = board.get_cell(row, col) %}
+                    <input
+                        type="text"
+                        name="cell_{{ row }}_{{ col }}"
+                        class="cell
+                            {% if col % 3 == 0 %}box-left{% endif %}
+                            {% if col % 3 == 2 %}box-right{% endif %}
+                            {% if row % 3 == 0 %}box-top{% endif %}
+                            {% if row % 3 == 2 %}box-bottom{% endif %}
+                            {% if cell.is_filled() and not cell.locked %}solved{% endif %}
+                            {% if cell.is_filled() and cell.locked %}given{% endif %}
+                        "
+                        value="{{ cell.value if cell.value != 0 else '' }}"
+                        maxlength="1"
+                        inputmode="numeric"
+                        pattern="[1-9]"
+                        oninput="this.value = this.value.replace(/[^1-9]/g, '').slice(0, 1)"
+                    >
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+        </form>
+    </div>
+</body>
+</html>
