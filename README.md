@@ -1,4 +1,3 @@
-```markdown
 # Sudoku Solver
 
 A Sudoku solver and generator built with Python. Available in three versions: CLI, GUI, and Web.
@@ -216,13 +215,3 @@ Recursive backtracking with constraint propagation.
 ## Credits
 
 Quote by Maki Kaji, Godfather of Sudoku (1951-2021), founder of Nikoli Co., Ltd. and the person who named "Sudoku."
-```
-
----
-
-Commit:
-```bash
-git add README.md
-git commit -m "Update README with all three versions and detailed descriptions"
-git push origin web-version
-```
